@@ -1,0 +1,185 @@
+\section{角误差约束下定位区域的构造与直径计算}
+
+\subsection{问题分析}
+
+问题一要求根据若干检测点的坐标及对应示向度，构造干扰源可能出现的定位区域，并计算该区域内任意两点之间距离的最大值。由于测向机给出的示向度存在不超过 $1^\circ$ 的误差，单次检测不能将干扰源限制在一条射线上，而只能将其限制在由两条边界射线围成的角形区域内。将全部检测结果对应的角形区域取交集，即可得到干扰源的多边形定位区域。
+
+在获得定位多边形后，问题转化为凸多边形的直径计算问题。首先采用半平面交算法求出定位多边形的顶点，再使用旋转卡壳算法寻找最远顶点对。最后，以定位区域直径为候选圆的直径，检验该圆是否能够覆盖定位区域。
+
+\subsection{示向误差区域的数学表示}
+
+设共有 $m$ 个检测点，第 $i$ 个检测点的坐标为
+\begin{equation}
+  S_i=(x_i,y_i),\qquad i=1,2,\ldots,m,
+  \label{eq:q1-detection-point}
+\end{equation}
+在该点测得的示向度为 $\theta_i$。将角度统一转换为弧度，并记测向误差上限为
+\begin{equation}
+  \varepsilon=1^\circ=\frac{\pi}{180}.
+  \label{eq:q1-angle-error}
+\end{equation}
+
+由误差范围可知，干扰源相对于检测点 $S_i$ 的真实方位角位于区间
+\begin{equation}
+  [\theta_i-\varepsilon,\,\theta_i+\varepsilon]
+  \label{eq:q1-angle-interval}
+\end{equation}
+内。定义该角形区域的两条边界方向向量为
+\begin{equation}
+  \mathbf{u}_i^-=
+  \begin{pmatrix}
+    \cos(\theta_i-\varepsilon)\\
+    \sin(\theta_i-\varepsilon)
+  \end{pmatrix},
+  \qquad
+  \mathbf{u}_i^+=
+  \begin{pmatrix}
+    \cos(\theta_i+\varepsilon)\\
+    \sin(\theta_i+\varepsilon)
+  \end{pmatrix}.
+  \label{eq:q1-boundary-vectors}
+\end{equation}
+
+对于二维向量 $\mathbf{a}=(a_x,a_y)$ 和 $\mathbf{b}=(b_x,b_y)$，定义叉积
+\begin{equation}
+  \mathbf{a}\times\mathbf{b}=a_xb_y-a_yb_x.
+  \label{eq:q1-cross-product}
+\end{equation}
+设 $X=(x,y)$ 为干扰源的候选位置，则第 $i$ 次观测对应的可行角形区域可表示为
+\begin{equation}
+  W_i=\left\{
+  X:\ \mathbf{u}_i^-\times(X-S_i)\geq 0,\quad
+  \mathbf{u}_i^+\times(X-S_i)\leq 0
+  \right\}.
+  \label{eq:q1-wedge}
+\end{equation}
+式~\eqref{eq:q1-wedge} 中的两个不等式分别给出了候选点相对于左、右边界射线的位置限制。只有同时满足两个不等式的点，才与第 $i$ 次示向观测相容。
+
+综合全部 $m$ 次检测结果，干扰源的定位区域为
+\begin{equation}
+  P=\bigcap_{i=1}^{m}W_i.
+  \label{eq:q1-polygon}
+\end{equation}
+每个 $W_i$ 均为两个半平面的交集，而凸集的交集仍为凸集，因此当 $P$ 非空且有界时，$P$ 为凸多边形。
+
+\subsection{基于半平面交的定位多边形求解}
+
+将式~\eqref{eq:q1-wedge} 中的每个角形约束拆分为两个有向半平面，可得到共 $2m$ 个半平面约束。本文采用计算几何中的半平面交方法\cite{deberg2008}，定位多边形的求解步骤如下：
+
+\begin{enumerate}
+  \item 将所有示向度转换为弧度，并将角度归一化到 $[0,2\pi)$；
+  \item 根据式~\eqref{eq:q1-boundary-vectors} 计算每次观测的两条边界方向向量，并生成相应的两个有向半平面；
+  \item 按各半平面边界直线的方向角排序。若存在方向相同的边界，则仅保留限制更严格的半平面；
+  \item 依次处理排序后的半平面，并使用双端队列维护当前有效边界。当队尾或队首相邻边界的交点不满足新半平面约束时，删除相应边界；
+  \item 处理首尾边界之间的约束关系，计算相邻有效边界的交点，得到按逆时针顺序排列的凸多边形顶点
+  \begin{equation}
+    V(P)=\{v_1,v_2,\ldots,v_q\}.
+    \label{eq:q1-vertices}
+  \end{equation}
+\end{enumerate}
+
+半平面排序的时间复杂度为 $O(m\log m)$，双端队列中的每条边界至多进入和移出一次，因此队列维护的时间复杂度为 $O(m)$。由此，构造定位多边形的总时间复杂度为
+\begin{equation}
+  O(m\log m).
+  \label{eq:q1-hpi-complexity}
+\end{equation}
+
+若半平面交为空，则说明输入的多次示向观测相互矛盾；若交集无界，则说明现有检测点的几何布局不足以形成有限定位区域。算法应分别返回“空定位区域”和“定位区域无界”，而不能继续计算一个没有实际意义的有限直径。
+
+\subsection{基于旋转卡壳的多边形直径计算}
+
+定位区域 $P$ 的直径定义为区域内任意两点之间欧氏距离的最大值，即
+\begin{equation}
+  d(P)=\max_{X,Y\in P}\|X-Y\|_2.
+  \label{eq:q1-diameter-definition}
+\end{equation}
+由于 $P$ 为凸多边形，若最远点中至少有一点位于某条边的内部，则沿该边向一个端点移动不会减小其与另一点的最大可能距离。因此，凸多边形的直径必可由一对顶点取得，从而有
+\begin{equation}
+  d(P)=\max_{1\leq i<j\leq q}\|v_i-v_j\|_2.
+  \label{eq:q1-diameter-vertices}
+\end{equation}
+
+直接枚举全部顶点对需要 $O(q^2)$ 的时间。考虑到式~\eqref{eq:q1-vertices} 已给出按逆时针排列的凸多边形顶点，本文采用旋转卡壳算法\cite{toussaint1983}在线性时间内寻找最远顶点对。其基本步骤如下：
+
+\begin{enumerate}
+  \item 依次选取凸多边形的每一条边 $(v_i,v_{i+1})$；
+  \item 维护与该边对应的对踵点 $v_j$，比较三角形有向面积
+  \begin{equation}
+    A(i,j)=\left|(v_{i+1}-v_i)\times(v_j-v_i)\right|;
+    \label{eq:q1-antipodal-area}
+  \end{equation}
+  \item 当 $A(i,j+1)>A(i,j)$ 时，将 $j$ 沿逆时针方向移动一位；
+  \item 对每组对踵点计算欧氏距离，并记录距离最大的顶点对 $(v_a,v_b)$；
+  \item 输出定位区域直径
+  \begin{equation}
+    d=\|v_a-v_b\|_2.
+    \label{eq:q1-final-diameter}
+  \end{equation}
+\end{enumerate}
+
+在旋转过程中，对踵点指针只沿多边形边界单向移动，最多遍历一周，因此该步骤的时间复杂度为 $O(q)$。结合半平面交步骤，问题一直径算法的总时间复杂度为
+\begin{equation}
+  O(m\log m+q).
+  \label{eq:q1-total-complexity}
+\end{equation}
+
+\subsection{以定位区域直径为直径的圆的覆盖判定}
+
+设旋转卡壳算法得到的最远顶点对为 $(v_a,v_b)$，定位区域直径为 $d$。以线段 $v_av_b$ 为直径的圆，其圆心和半径分别为
+\begin{equation}
+  c=\frac{v_a+v_b}{2},
+  \qquad
+  r=\frac{d}{2}.
+  \label{eq:q1-diameter-circle}
+\end{equation}
+
+由于圆盘是凸集，而定位多边形 $P$ 是其全部顶点的凸包，因此，只需检查所有顶点是否位于该圆盘内。精确覆盖判据为
+\begin{equation}
+  \|v_k-c\|_2\leq \frac{d}{2},
+  \qquad k=1,2,\ldots,q.
+  \label{eq:q1-cover-test}
+\end{equation}
+若式~\eqref{eq:q1-cover-test} 对所有顶点均成立，则该圆能够覆盖整个定位区域；若至少存在一个顶点不满足该式，则该圆不能覆盖定位区域。数值实现中使用距离容差 $\tau_d>0$，将右端写为 $d/2+\tau_d$，该放宽只用于吸收浮点舍入误差，不改变上述精确命题。
+
+上述覆盖性并非对任意定位多边形都成立。以锐角三角形为例，设其最长边为 $AB$，且 $|AB|=d$。由于最长边所对的角仍小于 $90^\circ$，根据泰勒斯定理，其第三个顶点位于以 $AB$ 为直径的圆外。因此，即使圆的直径等于定位区域直径，也不能保证该圆覆盖整个区域。由此可得一般性结论：
+\begin{equation}
+  \boxed{\text{以定位区域直径为直径的圆一般不能保证覆盖该定位区域。}}
+  \label{eq:q1-general-conclusion}
+\end{equation}
+
+为消除“指定最远点对的直径圆”与“任取圆心的直径为 $d$ 的圆”之间的歧义，进一步记定位区域的最小包围圆半径为
+\begin{equation}
+  R_{\mathrm{MEC}}(P)
+  =\min_{z\in\mathbf R^2}\max_{1\leq k\leq q}\|v_k-z\|_2.
+  \label{eq:q1-mec-radius}
+\end{equation}
+由于任意覆盖 $P$ 的圆盘半径均不小于 $d(P)/2$，故存在直径为 $d(P)$ 的圆覆盖 $P$ 的充要条件为
+\begin{equation}
+  R_{\mathrm{MEC}}(P)=\frac{d(P)}{2}.
+  \label{eq:q1-mec-test}
+\end{equation}
+由于半径为 $d/2$ 的圆若同时包含最远点 $v_a,v_b$，其圆心只能是二者中点，因此在精确算术下，式~\eqref{eq:q1-cover-test} 与式~\eqref{eq:q1-mec-test} 等价。数值实现可分别检查
+\[
+  \max_k\|v_k-c\|_2\leq d/2+\tau_d,
+  \qquad
+  \left|R_{\mathrm{MEC}}(P)-d/2\right|\leq\tau_d.
+\]
+两种带容差检验的圆心处理不同，故只将最小包围圆算法作为独立数值复核，不把二者宣称为严格等价。
+
+\subsection{算法汇总、模型检验与边界情况}
+
+综上，问题一的完整算法可以概括为：
+
+\begin{enumerate}
+  \item 输入检测点坐标 $S_i$ 与示向度 $\theta_i$；
+  \item 按照 $\pm1^\circ$ 的误差范围构造 $2m$ 个有向半平面；
+  \item 采用半平面交算法得到凸多边形顶点序列 $v_1,v_2,\ldots,v_q$；
+  \item 若交集为空或无界，则输出相应异常状态并终止；
+  \item 采用旋转卡壳算法求最远顶点对 $(v_a,v_b)$ 及多边形直径 $d$；
+  \item 取最远顶点对的中点为圆心、$d/2$ 为半径，利用式~\eqref{eq:q1-cover-test} 检查全部顶点；
+  \item 输出定位多边形顶点、最远顶点对、定位区域直径和覆盖判断结果。
+\end{enumerate}
+
+为检验几何算法的正确性，本文设置以下交叉验证：首先，将半平面交所得每个顶点代回式~\eqref{eq:q1-wedge}，确认其满足全部示向约束；其次，对顶点数较小的多边形同时使用 $O(q^2)$ 顶点对枚举和旋转卡壳计算直径，要求两者在容差内一致；再次，使用矩形、锐角三角形和钝角三角形等具有解析结论的图形检验覆盖判据，并用最小包围圆半径复核式~\eqref{eq:q1-cover-test}。上述检验分别覆盖可行域构造、直径计算和圆覆盖判断三个环节。
+
+当定位区域退化为单点时，其直径为 $0$；当定位区域退化为线段时，其直径为两个端点之间的距离，且以该线段为直径的圆能够覆盖整个退化区域。对于近乎平行的边界直线，方向角和平行判定使用 $\tau_\theta$，距离与覆盖判断使用 $\tau_d$，叉积和有向面积比较使用 $\tau_\times$，避免以同一数值容差混合处理不同量纲的几何量。

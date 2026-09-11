@@ -1,0 +1,27 @@
+\contentsline {section}{\numberline {一}问题重述}{2}{}%
+\contentsline {subsection}{\numberline {1.1}问题背景}{2}{}%
+\contentsline {subsection}{\numberline {1.2}问题内容}{2}{}%
+\contentsline {section}{\numberline {二}问题分析}{2}{}%
+\contentsline {subsection}{\numberline {2.1}问题一的分析}{2}{}%
+\contentsline {subsection}{\numberline {2.2}问题二的分析}{2}{}%
+\contentsline {subsection}{\numberline {2.3}问题之间的联系}{3}{}%
+\contentsline {section}{\numberline {三}模型假设}{3}{}%
+\contentsline {section}{\numberline {四}符号说明}{4}{}%
+\contentsline {section}{\numberline {五}角误差约束下定位区域的构造与直径计算}{5}{}%
+\contentsline {subsection}{\numberline {5.1}问题分析}{5}{}%
+\contentsline {subsection}{\numberline {5.2}示向误差区域的数学表示}{5}{}%
+\contentsline {subsection}{\numberline {5.3}基于半平面交的定位多边形求解}{6}{}%
+\contentsline {subsection}{\numberline {5.4}基于旋转卡壳的多边形直径计算}{6}{}%
+\contentsline {subsection}{\numberline {5.5}以定位区域直径为直径的圆的覆盖判定}{7}{}%
+\contentsline {subsection}{\numberline {5.6}算法汇总、模型检验与边界情况}{8}{}%
+\contentsline {section}{\numberline {六}鲁棒约束下的第二检测点选择}{9}{}%
+\contentsline {subsection}{\numberline {6.1}问题分析与建模思路}{9}{}%
+\contentsline {subsection}{\numberline {6.2}第一次观测后的干扰源候选区域}{9}{}%
+\contentsline {subsection}{\numberline {6.3}交会角与定位误差的关系}{10}{}%
+\contentsline {subsection}{\numberline {6.4}保证接收区域与候选区域}{10}{}%
+\contentsline {subsection}{\numberline {6.5}最坏定位直径模型}{12}{}%
+\contentsline {subsection}{\numberline {6.6}分层优化模型}{13}{}%
+\contentsline {subsection}{\numberline {6.7}数值求解算法}{13}{}%
+\contentsline {subsection}{\numberline {6.8}数值检验方案}{15}{}%
+\contentsline {subsection}{\numberline {6.9}策略结论}{15}{}%
+\contentsline {section}{参考文献}{16}{}%

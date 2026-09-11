@@ -1,0 +1,290 @@
+\section{鲁棒约束下的第二检测点选择}
+
+\subsection{问题分析与建模思路}
+
+问题二已知某全向干扰源在第一个检测点处的示向度，要求确定第二个检测点的选择策略及候选区域。第二个检测点既要与第一次示向方向形成较大的交会角，以减弱角度误差对定位结果的放大作用，又要尽可能位于干扰源的有效接收范围内。由于不同干扰源的有效接收半径未知，但均属于 $[1000,1500]$ 米，因此第二次检测应优先利用 $1000$ 米的共同下界建立确定性的接收保证。在此基础上，以连续最坏定位损失为理论主目标，以移动时间为次目标，并用有限网格给出可复现的离散近似。
+
+本节沿用问题一的半平面表示。首先根据第一次观测构造干扰源候选区域，然后给出满足接收保证的第二检测点区域，并将其分为第一次示向线左右两侧的两个候选子区域。理论上使用全部已有信息更新二次位置可行域；数值上以圆域外接多边形复用问题一的半平面交和直径算法，得到有限网格下的近似优良检测位置。
+
+\subsection{第一次观测后的干扰源候选区域}
+
+设第一个检测点为 $S_1=(x_1,y_1)$，测得示向度为 $\theta_1$，测向误差上限仍记为 $\varepsilon=\pi/180$。由式~\eqref{eq:q1-wedge}，第一次观测对应的示向角形区域为 $W_1$。记目标圆域为
+\begin{equation}
+  D=\left\{G:\|G\|_2\leq1800\right\}.
+  \label{eq:q2-target-disk}
+\end{equation}
+
+由于已经获得示向度，说明第一个检测点位于该干扰源的有效接收范围内。虽然干扰源的真实有效接收半径未知，但其上界为 $1500$ 米，因此真实源位置必定位于 $B(S_1,1500)$ 内。为保持候选区域的凸性并给出保守的接收保证，先暂不利用“距离超过 $5$ 米”这一微小的近距离排除条件，定义扩大的凸候选区域为
+\begin{equation}
+  C_1=D\cap W_1\cap B(S_1,1500).
+  \label{eq:q2-first-region}
+\end{equation}
+式~\eqref{eq:q2-first-region} 同时包含目标区域约束、第一次示向约束和最大接收距离约束。由于第一次检测得到的是示向度而非“距离过近”提示，物理上与该次观测相容的有效源集还应满足 $\|G-S_1\|_2>5$，记为
+\[
+  C_1^{\mathrm{dir}}
+  =\left\{G\in C_1:\|G-S_1\|_2>5\right\}.
+\]
+后续构造保证接收区域时仍使用扩大的凸集 $C_1$，以保持接收保证的保守性；涉及真实方位角、交会角和定位损失时则使用 $C_1^{\mathrm{dir}}$，从而避免零向量方向未定义的问题。
+
+需要注意，第一次检测成功只能推出 $\|G-S_1\|_2\leq1500$，不能推出 $\|G-S_1\|_2\leq1000$。这是因为真实有效接收半径可能取 $1000$ 至 $1500$ 米之间的任意值。
+
+\subsection{交会角与定位误差的关系}
+
+设真实干扰源位置为 $G$，第二个检测点为 $q$。从两个检测点指向干扰源的方向向量分别为 $G-S_1$ 和 $G-q$，两次示向线的交会角定义为
+\begin{equation}
+  \phi(G,q)=\angle(G-S_1,G-q),
+  \qquad 0\leq\phi(G,q)\leq\pi.
+  \label{eq:q2-cross-angle}
+\end{equation}
+
+在小误差线性化条件下，位置误差中包含如下交会几何放大因子：
+\begin{equation}
+  \kappa(G,q)=\frac{1}{|\sin\phi(G,q)|}
+  \label{eq:q2-amplification}
+\end{equation}
+当 $\phi$ 接近 $0$ 或 $\pi$ 时，两条示向线近乎平行或反平行，$\kappa$ 急剧增大；当 $\phi$ 接近 $\pi/2$ 时，$\kappa$ 取得最小值。实际位置误差还受两次观测距离影响，因此 $\kappa$ 只用于几何解释和搜索引导，候选点的最终评价仍以定位区域直径为准。
+
+但是，若机器狗只在 $S_1$ 处沿垂直于示向线的方向移动，则其与远距离干扰源的距离可能进一步增大，导致第二次检测无法接收到信号。因此，本节采用“沿示向方向前进并向一侧偏移”的候选点结构，在接收可靠性和交会角之间取得平衡。
+
+\subsection{保证接收区域与候选区域}
+
+由于所有全向干扰源的有效接收半径均不小于 $1000$ 米，只要第二检测点到 $C_1$ 内任意可能源位置的距离均不超过 $1000$ 米，即可保证第二次检测收到信号。定义保证接收区域
+\begin{equation}
+  Q_{\mathrm{det}}
+  =\left\{
+  q:\max_{G\in C_1}\|q-G\|_2\leq1000
+  \right\}
+  =\bigcap_{G\in C_1}B(G,1000).
+  \label{eq:q2-detection-region}
+\end{equation}
+
+下面说明式~\eqref{eq:q2-detection-region} 在本题条件下非空。定义第一次示向中心方向的单位向量
+\begin{equation}
+  \mathbf u=
+  \begin{pmatrix}
+    \cos\theta_1\\
+    \sin\theta_1
+  \end{pmatrix},
+  \label{eq:q2-center-direction}
+\end{equation}
+并在中心示向线上取点
+\begin{equation}
+  q_0=S_1+750\mathbf u.
+  \label{eq:q2-feasible-point}
+\end{equation}
+任取 $G\in C_1$，均可将其表示为
+\begin{equation}
+  G=S_1+r
+  \begin{pmatrix}
+    \cos(\theta_1+\delta)\\
+    \sin(\theta_1+\delta)
+  \end{pmatrix},
+  \qquad 0\leq r\leq1500,\qquad |\delta|\leq\varepsilon.
+  \label{eq:q2-source-parameterization}
+\end{equation}
+这里仅使用 $C_1\subseteq B(S_1,1500)\cap W_1$ 得到的必要范围；目标圆域 $D$ 只会进一步缩小不同方向上 $r$ 的可取区间。因此，在式~\eqref{eq:q2-source-parameterization} 所示扩大参数域上得到的距离上界，对真实集合 $C_1$ 仍是有效的保守上界。
+由余弦定理，$q_0$ 与 $G$ 的距离满足
+\begin{equation}
+  \|q_0-G\|_2^2
+  =r^2+750^2-1500r\cos\delta.
+  \label{eq:q2-feasible-distance}
+\end{equation}
+对于固定的 $\delta$，式~\eqref{eq:q2-feasible-distance} 关于 $r$ 为凸二次函数，其在区间 $[0,1500]$ 上的最大值于端点取得。当 $r=0$ 时距离为 $750$ 米；当 $r=1500$ 且 $|\delta|=1^\circ$ 时，距离约为 $750.23$ 米。因此
+\begin{equation}
+  \max_{G\in C_1}\|q_0-G\|_2<751<1000,
+  \label{eq:q2-nonempty-proof}
+\end{equation}
+从而 $q_0\in Q_{\mathrm{det}}$，保证接收区域必定非空。进一步由三角不等式，对任意满足 $\|q-q_0\|_2<249$ 的点，均有
+\[
+  \|q-G\|_2
+  \leq\|q-q_0\|_2+\|q_0-G\|_2<1000,
+  \qquad G\in C_1.
+\]
+故 $B^\circ(q_0,249)\subseteq Q_{\mathrm{det}}$，这也直接说明 $q_0$ 左右两侧均存在保证接收的候选点。
+
+为描述候选区域的左右结构，定义垂直于 $\mathbf u$ 的单位向量
+\begin{equation}
+  \mathbf n=
+  \begin{pmatrix}
+    -\sin\theta_1\\
+    \cos\theta_1
+  \end{pmatrix}.
+  \label{eq:q2-normal-direction}
+\end{equation}
+任意第二检测点可写为
+\begin{equation}
+  q=S_1+a\mathbf u+b\mathbf n,
+  \label{eq:q2-candidate-parameterization}
+\end{equation}
+其中 $a$ 表示沿中心示向方向的前进距离，$b$ 表示侧向偏移量。本文采用基于 $1000$ 米统一接收下界的保守可靠候选区域
+\begin{equation}
+  Q_{\mathrm{cand}}=Q_{\mathrm{det}}.
+  \label{eq:q2-candidate-region}
+\end{equation}
+为利用交会角的几何规律加速搜索，再根据 $b$ 的正负定义两个优先搜索子区域
+\begin{align}
+  Q_{\mathrm L}
+  &=\left\{q\in Q_{\mathrm{cand}}:b>0\right\},
+  \label{eq:q2-left-region}\\
+  Q_{\mathrm R}
+  &=\left\{q\in Q_{\mathrm{cand}}:b<0\right\}.
+  \label{eq:q2-right-region}
+\end{align}
+两个子区域分别位于第一次中心示向线的左、右两侧。由 $B^\circ(q_0,249)\subseteq Q_{\mathrm{det}}$ 可知，对充分小的 $\eta>0$，点 $q_0\pm\eta\mathbf n$ 仍属于 $Q_{\mathrm{cand}}$，左右两个优先区域均非空。中心示向线和其他边界点虽然通常会因交会角较差而被目标函数淘汰，但仍保留在整个保守候选域中作为对照，避免在没有全局证明时提前删除潜在可行解。数值搜索时可优先考察 $0<a<1500$ 的左右区域，再对整个 $Q_{\mathrm{cand}}$ 做边界复核。
+
+\subsection{最坏定位直径模型}
+
+对于候选点 $q$ 和可能的真实源位置 $G\in C_1^{\mathrm{dir}}$，当 $\|q-G\|_2>5$ 时，第二检测点指向干扰源的真实方位角为
+\begin{equation}
+  \beta(q,G)=\operatorname{atan2}(G_y-q_y,G_x-q_x),
+  \qquad \|q-G\|_2>5.
+  \label{eq:q2-true-bearing}
+\end{equation}
+设第二次测量误差为 $e_2\in[-\varepsilon,\varepsilon]$，则第二次实际测得的示向度可表示为
+\begin{equation}
+  \theta_2=\operatorname{wrap}_{[0,2\pi)}\bigl(\beta(q,G)+e_2\bigr).
+  \label{eq:q2-second-bearing}
+\end{equation}
+
+由检测点 $q$ 和示向度 $\theta_2$ 构造第二个角形区域 $W_2(q,\theta_2)$。为利用目标圆域、第一次示向和最大接收距离等全部已有信息，第二次观测后的位置可行域定义为
+\begin{equation}
+  P_2(q,G,e_2)
+  =C_1\cap W_2\bigl(q,\operatorname{wrap}_{[0,2\pi)}(\beta(q,G)+e_2)\bigr).
+  \label{eq:q2-second-polygon}
+\end{equation}
+由于 $P_2\subseteq C_1\subseteq B(S_1,1500)$，正常测向情形下 $P_2$ 必然有界，且 $d(P_2)\leq3000$ 米。这里的 $P_2$ 表示利用全部已知信息得到的二次位置可行域，而不只是两条示向带的纯角度交会区域。
+
+集合 $C_1$ 含有圆弧边界，精确的 $P_2$ 不一定是多边形。为复用问题一的半平面交和旋转卡壳算法，数值实现使用圆域的外接正多边形构造保守外近似 $\widehat C_{1,N}$，并令
+\[
+  C_1\subseteq\widehat C_{1,N},
+  \qquad
+  \widehat P_{2,N}(q,G,e)
+  =\widehat C_{1,N}\cap
+  W_2\bigl(q,\operatorname{wrap}_{[0,2\pi)}(\beta(q,G)+e)\bigr).
+\]
+于是 $P_2\subseteq\widehat P_{2,N}$，从而 $d(P_2)\leq d(\widehat P_{2,N})$。增加外接多边形边数 $N$ 可逐步减小区域外扩误差。
+
+为处理第二检测点距离干扰源过近的情形，定义定位任务损失
+\[
+  L(q,G,e_2)=
+  \begin{cases}
+    0,
+    & \|q-G\|_2\leq 5,\\
+    d\left[P_2(q,G,e_2)\right],
+    & \|q-G\|_2>5.
+  \end{cases}
+\]
+其中，损失为 $0$ 表示测向机返回“距离过近”后可直接进行光学精确定位与清除。这里的 $0$ 是任务评价损失，而不是把尚未形成的示向区域解释为直径为 $0$。由于 $C_1^{\mathrm{dir}}$ 不是闭集，为避免未经证明地假定最坏情形必然能够取到，定义候选点 $q$ 的连续最坏定位损失为上确界
+\begin{equation}
+  D_{\mathrm{wc}}(q)
+  =\sup_{\substack{G\in C_1^{\mathrm{dir}}\\e_2\in[-\varepsilon,\varepsilon]}}
+  L(q,G,e_2).
+  \label{eq:q2-worst-diameter}
+\end{equation}
+
+式~\eqref{eq:q2-worst-diameter} 同时考虑了真实源位置未知和第二次测量误差未知两类不确定性，能够避免使用无误差中心线评价时对定位效果的高估。它是理论鲁棒目标；后文的有限采样值只是对该连续目标的数值近似，二者不混用。
+
+\subsection{分层优化模型}
+
+问题二的主要目标是获得较好的定位效果。先定义保守可靠候选域上的最优值
+\begin{equation}
+  D_*=\inf_{q\in Q_{\mathrm{cand}}}D_{\mathrm{wc}}(q).
+  \label{eq:q2-primary-objective}
+\end{equation}
+
+移动时间不是问题二的首要评价指标，但会影响问题三中的总任务时间。为保持模型的递进性，将其作为次级目标。给定允许的定位损失容差 $\Delta_D>0$，定义近似最优点集
+\begin{equation}
+  Q_\Delta=
+  \left\{
+  q\in Q_{\mathrm{cand}}:
+  D_{\mathrm{wc}}(q)\leq D_*+\Delta_D
+  \right\}.
+  \label{eq:q2-near-optimal-set}
+\end{equation}
+最终从该集合中选择移动时间最短的点
+\begin{equation}
+  q^{**}\in\arg\min_{q\in Q_\Delta}
+  T_{\mathrm{move}}(q),
+  \qquad
+  T_{\mathrm{move}}(q)=\frac{\|q-S_1\|_2}{5}.
+  \label{eq:q2-secondary-objective}
+\end{equation}
+
+接收可靠性由 $q\in Q_{\mathrm{cand}}$ 这一硬约束保证；分层优化用于明确“定位效果优先、移动时间其次”的决策顺序，避免主次目标被任意权重混合。
+
+作为几何解释，先定义第二次测向方向有效的源集
+\[
+  C_1^{\mathrm{ang}}(q)
+  =\left\{G\in C_1^{\mathrm{dir}}:\|q-G\|_2>5\right\}.
+\]
+当该集合非空时，可以使用最小交会角质量指标
+\begin{equation}
+  J_\phi(q)=\inf_{G\in C_1^{\mathrm{ang}}(q)}|\sin\phi(G,q)|.
+  \label{eq:q2-angle-quality}
+\end{equation}
+$J_\phi(q)$ 只用于解释交会几何并安排粗网格的搜索顺序，不参与式~\eqref{eq:q2-primary-objective} 至式~\eqref{eq:q2-secondary-objective} 的最终分层排序。该指标在交会角为 $90^\circ$ 时较大，并同时排斥接近 $0^\circ$ 和 $180^\circ$ 的退化观测。若 $C_1^{\mathrm{ang}}(q)$ 为空，则第二检测点到所有物理可行源位置的距离均不超过 $5$ 米，已经能够保证直接精确定位，无需再计算交会角指标。
+
+\subsection{数值求解算法}
+
+由于式~\eqref{eq:q2-worst-diameter} 包含连续源位置、连续测量误差和连续检测点三层变量，有限网格不能直接等同于连续最坏值。设源位置样本、误差样本和检测点网格分别为
+\[
+  \mathcal G_K\subset C_1^{\mathrm{dir}},
+  \qquad
+  \mathcal E_L\subset[-\varepsilon,\varepsilon],
+  \qquad
+  \mathcal Q_M\subset Q_{\mathrm{cand}}.
+\]
+基于外近似 $\widehat C_{1,N}$，定义样本情景损失
+\[
+  \widehat L_N(q,G,e)=
+  \begin{cases}
+    0, & \|q-G\|_2\leq5,\\
+    d\left[\widehat P_{2,N}(q,G,e)\right], & \|q-G\|_2>5,
+  \end{cases}
+\]
+以及有限样本评价值
+\[
+  \widehat D_{\mathrm{sample},N}(q)
+  =\max_{\substack{G\in\mathcal G_K\\e\in\mathcal E_L}}
+  \widehat L_N(q,G,e).
+\]
+对每个已采样情景，外近似保证 $L(q,G,e)\leq\widehat L_N(q,G,e)$；但有限情景仍可能遗漏连续集合中的最坏点，因此不能把 $\widehat D_{\mathrm{sample},N}$ 直接称为 $D_{\mathrm{wc}}$ 的严格上界或精确值。数值层相应定义
+\[
+  \widehat D_{*,M,N}
+  =\min_{q\in\mathcal Q_M}\widehat D_{\mathrm{sample},N}(q),
+  \qquad
+  \mathcal Q_{\Delta,M,N}
+  =\left\{q\in\mathcal Q_M:
+  \widehat D_{\mathrm{sample},N}(q)
+  \leq\widehat D_{*,M,N}+\Delta_D\right\},
+\]
+并从 $\mathcal Q_{\Delta,M,N}$ 中选择移动时间较短的 $q_{\mathrm{sample}}^{**}$。该点只是当前离散层级下的推荐点，并通过多层加密评价其数值稳定性。
+
+\begin{enumerate}
+  \item 根据式~\eqref{eq:q2-first-region} 构造精确候选源区域 $C_1$，再以圆域的外接正多边形构造 $\widehat C_{1,N}$；
+  \item 在 $C_1^{\mathrm{dir}}$ 内部及其边界邻域进行分层采样，纳入圆弧端点、半平面交点和径向端点；在半径为 $5$ 米的排除圆外侧逐步逼近边界，边界点本身只用于极限情形复核，不把它误作 $C_1^{\mathrm{dir}}$ 内的合法样本；
+  \item 在保守可靠候选域中生成第二检测点粗网格，并优先加密中心示向线左右两侧、$0<a<1500$ 的区域；对每个网格点精确计算其到 $C_1$ 连续边界的最大距离，只将满足接收硬约束的点纳入 $\mathcal Q_M$；
+  \item 对每个 $q\in\mathcal Q_M$，遍历 $G\in\mathcal G_K$ 和 $e\in\mathcal E_L$。若 $\|q-G\|_2\leq5$，按直接定位成功处理；否则以半平面交构造 $\widehat P_{2,N}$，并用旋转卡壳算法计算其直径；
+  \item 取全部已采样情景中的最大值作为 $\widehat D_{\mathrm{sample},N}(q)$，选出样本评价值较小的若干候选点；
+  \item 同时增加外接多边形边数、加密源位置和误差样本，并在优良候选点附近缩小检测点网格；记录不同层级下的目标值及近似最优候选集，而不把单次网格结果解释为连续全局最优；
+  \item 对推荐候选点重新进行连续接收边界复核，并分别报告样本评价值、网格层级和 $\mathcal Q_{\Delta,M,N}$，再从该离散近似最优集合中选择移动时间较短的第二检测点。
+\end{enumerate}
+
+误差离散可首先取 $e\in\{-\varepsilon,0,\varepsilon\}$，随后增加中间误差点；但极端误差和边界点复核只能作为补充检查，不能代替对连续最坏情形的证明。定位效果评价中的源位置样本应同时覆盖 $C_1^{\mathrm{dir}}$ 的边界邻域与内部，从而保留第一次候选区域的二维几何特征。对于接收保证，数值实现必须计算 $q$ 到 $C_1$ 连续边界的最大距离；直线段只需检查端点，圆弧则检查两个端点以及圆弧上与 $q$ 方向相反的驻点，不能以有限随机样本代替硬约束验证。
+
+\subsection{数值检验方案}
+
+为检查离散算法的可行性和数值稳定性，设计以下四类复核：
+\begin{enumerate}
+  \item \textbf{接收约束复核：}在候选点筛选阶段及最终推荐阶段，均计算检测点到 $C_1$ 连续边界的最大距离，验证该值不超过 $1000$ 米；
+  \item \textbf{情景加密复核：}除 $e=\pm\varepsilon$ 外逐步增加中间误差点，同时加密源位置样本，检查样本评价值随情景加密的变化；
+  \item \textbf{网格稳定性复核：}逐级减小候选点网格间距并增加外接多边形边数，若目标值和近似最优候选集趋于稳定，则只据此报告所采用离散层级下的数值稳定性，不宣称已经证明连续全局最优；
+  \item \textbf{基线策略对照：}在获得具体首次观测数据后，与沿中心示向线前进、原地垂直移动和随机选点三种策略比较样本评价值。
+\end{enumerate}
+同时将问题一的半平面交顶点约束检查和旋转卡壳枚举对照嵌入每次候选点评价，从而避免底层几何误差传递至选点结果。当前阶段尚未给出具体首次观测输入和程序运行结果，因此本节属于检验方案，不能表述为已经完成实验验证。
+
+\subsection{策略结论}
+
+综上，第二检测点在基于 $1000$ 米统一接收下界构造的保守可靠候选域 $Q_{\mathrm{cand}}$ 中选取，并优先搜索第一次示向线左右两侧的区域。接收硬约束提供确定性接收保证；理论上以连续最坏定位损失为主要目标，以移动时间为次要目标。实际程序采用外近似和有限网格得到离散评价值及近似最优候选点，不把该数值结果直接等同于连续全局最优解。
+
+本节的位置可行域更新和直径计算可作为后续在线定位的几何基础。对于全向源，可沿用基于距离下界的可靠检测点构造；在线更新时应保留全部历史观测约束，而不是只保留最近两次示向。对于定向源，还必须加入发射朝向条件或独立的保证搜索机制，不能仅凭距离约束保证接收。
