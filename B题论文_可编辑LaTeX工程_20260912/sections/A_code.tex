@@ -1,0 +1,48 @@
+% !TEX root = ../main.tex
+\section*{附录 A\quad 支撑材料文件列表}
+
+支撑材料压缩包按以下结构组织，所列程序均为论文建模、求解与复核所用的完整源文件：
+
+\begin{enumerate}
+  \item \texttt{AI工具使用详情.pdf}：AI工具名称、用途、使用方式及人工核验说明；
+  \item \texttt{源程序/问题一/quest1.py}：半平面交、旋转卡壳与覆盖判定程序；
+  \item \texttt{源程序/问题二/q2\_solver\_robust\_20260911.py}：候选源区域、接收保证域及第二检测点鲁棒优化程序；
+  \item \texttt{源程序/问题三/}：多频道自动搜索、四叉树可行域维护、离线仿真程序及参数文件；
+  \item \texttt{结果数据/q2\_result.json}：问题二复核结果；\texttt{结果数据/q3\_current\_36\_runs.json}：问题三当前参数的 36 局离线运行记录；
+  \item \texttt{README\_支撑材料说明.md}：运行环境、入口命令和文件说明。
+\end{enumerate}
+
+\noindent 三问程序均仅依赖 Python 标准库。问题三正式入口优先读取同目录下的 \texttt{params.json}，离线复核入口为 \texttt{auto\_test.py}。所有路径均为压缩包内相对路径。
+
+\newcommand{\codeinput}[2]{%
+  \subsection*{#1}
+  \VerbatimInput[
+    fontsize=\tiny,
+    numbers=left,
+    numbersep=4pt,
+    frame=single,
+    breaklines=true,
+    breakanywhere=true,
+    tabsize=4
+  ]{#2}%
+}
+
+\clearpage
+\section*{附录 B\quad 问题一完整源程序}
+\codeinput{quest1.py}{appendix_code/问题一/quest1.py}
+
+\clearpage
+\section*{附录 C\quad 问题二完整源程序}
+\codeinput{q2\_solver\_robust\_20260911.py}{appendix_code/问题二/q2_solver_robust_20260911.py}
+
+\clearpage
+\section*{附录 D\quad 问题三完整源程序}
+\codeinput{algorithm.py}{appendix_code/问题三/algorithm.py}
+\codeinput{auto\_test.py}{appendix_code/问题三/auto_test.py}
+\codeinput{basic\_sim.py}{appendix_code/问题三/basic_sim.py}
+\codeinput{iterator.py}{appendix_code/问题三/iterator.py}
+\codeinput{main.py}{appendix_code/问题三/main.py}
+\codeinput{quest3.py}{appendix_code/问题三/quest3.py}
+\codeinput{sss.py}{appendix_code/问题三/sss.py}
+\codeinput{params.json}{appendix_code/问题三/params.json}
+\codeinput{candidates.json}{appendix_code/问题三/candidates.json}

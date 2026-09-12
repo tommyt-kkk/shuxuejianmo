@@ -1,0 +1,34 @@
+% !TEX root = ../main.tex
+\clearpage
+\section{符号说明}
+
+本文使用的主要符号如表~1 所示。除特别说明外，位置和距离均采用米作为单位，参与三角函数计算的角度统一转换为弧度。
+
+\begin{center}
+  {\fontsize{12pt}{14.4pt}\heiti 表 1\quad 主要符号说明}\\[0.6em]
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{>{\centering\arraybackslash}p{2.3cm}p{9.0cm}>{\centering\arraybackslash}p{2.0cm}}
+    \toprule
+    \textbf{符号} & \centering\textbf{含义} & \textbf{单位} \\
+    \midrule
+    $D$ & 半径为 $1800$ 的干扰源目标圆域 & --- \\
+    $S_i$ & 第 $i$ 个检测点的位置坐标 & m \\
+    $\theta_i$ & 在检测点 $S_i$ 处测得的示向度 & rad \\
+    $\varepsilon$ & 示向度的最大绝对误差，取 $\pi/180$ & rad \\
+    $W_i$ & 第 $i$ 次示向观测形成的角形可行区域 & --- \\
+    $P$ & 多次示向角形区域的交会定位多边形 & --- \\
+    $d(P)$ & 定位区域 $P$ 内任意两点距离的最大值 & m \\
+    $R_{\mathrm{MEC}}(P)$ & 定位区域 $P$ 的最小包围圆半径 & m \\
+    $C_1$ & 第一次观测后干扰源的保守候选区域 & --- \\
+    $q$ & 第二个检测点的候选位置 & m \\
+    $\phi(G,q)$ & 两次示向线关于真实源位置 $G$ 的交会角 & rad \\
+    $Q_{\mathrm{det}}$ & 基于统一接收下界构造的保证接收区域 & --- \\
+    $Q_{\mathrm{cand}}$ & 本文采用的保守可靠候选区域 & --- \\
+    $D_{\mathrm{wc}}(q)$ & 候选点 $q$ 对应的连续最坏定位损失 & m \\
+    $T_{\mathrm{move}}(q)$ & 机器狗由 $S_1$ 移动至 $q$ 的时间 & s \\
+    $\tau_d$ & 距离和覆盖判定使用的数值容差 & m \\
+    $\tau_\theta$ & 方向角和平行判定使用的数值容差 & rad \\
+    $\tau_\times$ & 叉积和有向面积比较使用的数值容差 & $\mathrm{m}^2$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}

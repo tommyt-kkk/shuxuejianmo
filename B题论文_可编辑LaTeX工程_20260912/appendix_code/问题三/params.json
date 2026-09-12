@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "status": "offline_validated",
+  "algorithm_version": "69a36076e32dfa8e",
+  "environment_version": "06842375302bcab7",
+  "config_id": "fdb648053165a40f",
+  "config": {
+    "region_radius": 1800.0,
+    "minimum_range": 1000.0,
+    "maximum_range": 1500.0,
+    "direction_error_deg": 1.005001,
+    "clear_radius": 20.0,
+    "near_radius": 5.0,
+    "speed": 5.0,
+    "cell_size": 14.0,
+    "search_ring_radius": 1450.0,
+    "lateral_offsets": [
+      40.0,
+      100.0,
+      220.0
+    ],
+    "lookahead_samples": 21,
+    "early_clear_mass": 0.55,
+    "max_localization_measures": 6,
+    "max_failed_clears": 2,
+    "max_deferred_actions": 70,
+    "real_time_reserve_s": 3.0,
+    "clear_candidate_samples": 15,
+    "failed_clear_penalty_s": 12.0,
+    "no_signal_penalty_s": 150.0,
+    "extra_measure_penalty_s": 18.0,
+    "target_uncertainty_m": 12.0,
+    "geometry_sine_floor": 0.015
+  },
+  "evidence_batch_id": "b22cc5443468431fbc5b9486831732f1",
+  "updated_at": 1789112048.8178463
+}
